@@ -5,7 +5,9 @@ MTKeras is a Metamorphic Testing tool for testing machine learning applications 
 Yelin Liu and Zhi Quan Zhou, University of Wollongong and Morphick Solutions Pty Ltd, Australia.
 
 ## Publication and citation
-Cite: Yelin Liu, Yang Liu, Tsong Yueh Chen, and Zhi Quan Zhou, "A Testing Tool for Machine Learning Applications," in Proceedings of the IEEE/ACM 5th International Workshop on Metamorphic Testing, 2020. ACM.
+Please cite the following paper:
+
+Yelin Liu, Yang Liu, Tsong Yueh Chen, and Zhi Quan Zhou. “A Testing Tool for Machine Learning Applications.” In IEEE/ACM 42nd International Conference on Software Engineering Workshops (ICSEW’20), 2020. DOI: https://doi.org/10.1145/3387940.3392694
 
 ## Table of Contents
 ### [1. Overview](#Overview)
