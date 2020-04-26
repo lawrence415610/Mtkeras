@@ -29,12 +29,12 @@ class Mtkeras:
         - dataType: a string that can represent the context of the software undertest, it can be:
             1. grayscaleImage
             2. colorImage
-            2. text
+            3. text
         - model: an object. It is the neural network model undertest, if the Mtkeras is only used for test case generation, this argument can be omitted. The "model" argument is needed only when MROP is performed. 
 
     Returns:
         It will return a Mtkeras object, by calling different attributes, the returns will be different.
-        - return a tranformed dataset(an array/ndarray), call the property ".myTestSet"
+        - return a tranformed dataset(a list), call the property ".myTestSet"
         - return a dataset of violating cases, call the property ".violatingCases"
     """
     def __init__(self, myTestSet, dataType='grayscaleImage', model=None):
@@ -44,6 +44,282 @@ class Mtkeras:
         self.violatingCases = []
         self.model = model
 
+    '''
+    Summary:
+        The "permutative" MRIP: the user can shuffle the order of the data randomly in the dataset
+
+    Args: 
+        None
+
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+
+    '''
+    def permutative(self):
+        # shuffle the order of every sentence 
+        if(self.dataType == 'text'):
+            for j,ele in enumerate(self.myTestSet):
+                random.shuffle(ele)
+        return self
+            
+
+    '''
+    Summary: 
+        The "additive" MRIP: increase (or decrease) numerical values by a constant for each pieces of data in the dataset
+
+    Args:
+        - n_additive: integer, the constant that is used to change each pieces of data
+
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+    '''
+    def additive(self, n_additive):
+        # add a constant to every pixel in a picture
+        if(self.dataType=='grayscaleImage'):
+            picx = self.myTestSet.shape[1]
+            picy = self.myTestSet.shape[2]
+            matrix = np.ones((picx,picy))*n_additive
+            self.myTestSet += matrix
+            return self
+
+
+    '''
+    Summary:
+        The "brightness" MRIP: for images, this MRIP can adjust the image's brightness. It transforms the input image pixelwise according to the equation O = I**gamma after scaling each pixel to the range 0 to 1
+
+    Args:
+        - gamma(optional): float, non negative real number, the default value is 1
+        - gain(optional): float, the constant multiplier. Default value is 1
+    
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+    '''
+    def brightness(self, gamma=1, gain=1):
+        # adjust the brightness of the picture
+        for index,ele in enumerate(self.myTestSet):
+            self.myTestSet[index] = skimage.exposure.adjust_gamma(ele, gamma, gain)
+            return self
+    
+
+    '''
+    Summary:
+        the "multiplicative" MRIP: multiply numerical values by a constant for each pieces of data in the dataset
+
+    Args:
+        - n_mul: integer, the constant used for multiplying the dataset
+    
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+    '''
+    def multiplicative(self, n_mul):
+        # multiple every pixel by a constant
+        if(self.dataType=='grayscaleImage'):
+            self.myTestSet = self.myTestSet * n_mul
+            return self
+    
+
+    '''
+    Summary:
+        the "invertive" MRIP: invert the element in the dataset, in the dataType of an image, the invertive version of the image will be a color-flipped picture
+
+    Args:
+        None
+    
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+    '''
+    def invertive(self):
+        # invert the order of the text sequence
+        if(self.dataType=='text'):
+            for i in range(len(self.myTestSet)):
+                self.myTestSet[i].reverse()
+            return self
+
+    
+    '''
+    Summary:
+        the "noise" MRIP: create one or more noise points in a dataset
+
+    Args:
+        - n_noise: integer, n_noise>=0, the number of the noise point that is added to the dataset 
+    
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+    '''
+    def noise(self, n_noise):
+        # add random noise point into a picture
+        if(self.dataType=='grayscaleImage'):
+            picx = self.myTestSet.shape[1]
+            picy = self.myTestSet.shape[2]
+            noise = np.zeros((picx, picy))
+            for i in range(n_noise):
+                xaxis = np.random.randint(0, picx)
+                yaxis = np.random.randint(0, picy)
+                noise[xaxis][yaxis] = np.random.randint(0,255)
+            self.myTestSet = self.myTestSet + noise
+            return self
+        elif(self.dataType=='colorImage'):
+            picx = self.myTestSet.shape[1]
+            picy = self.myTestSet.shape[2]
+            noise = np.zeros((picx, picy, 3))
+            for i in range(n_noise):
+                xaxis = np.random.randint(0, picx)
+                yaxis = np.random.randint(0, picy)
+                noise[xaxis][yaxis][np.random.randint(0,3)] = np.random.randint(0,255)
+            self.myTestSet = self.myTestSet + noise
+            return self
+        # add random word into a text
+        elif(self.dataType=='text'):
+            for i in range(n_noise):
+                self.myTestSet[np.random.randint(0, self.myTestSet.shape[0])].insert(0,4)
+            return self
+
+
+    '''
+    Summary:
+        the "fliph" MRIP: flip the data horizontally
+
+    Args:
+        None
+    
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+    '''
+    def fliph(self):
+        # flip the picture horizontally
+        self.myTestSet = np.fliplr(self.myTestSet)
+        return self
+
+    
+    '''
+    Summary:
+        the "flipv" MRIP: flip the data vertically
+
+    Args:
+        None
+    
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+    '''
+    def flipv(self):
+        # flip the picture vertically
+        self.myTestSet = np.flipud(self.myTestSet)
+        return self
+
+
+    '''
+    Summary:
+        the "rotation" MRIP: rotate the data, 
+
+    Args:
+        -n_deg: float, specify the degree that the image rotate
+    
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+    '''
+    def rotate(self, n_deg):
+        # rotate the picture to a certain degree
+        for index,ele in enumerate(self.myTestSet):
+            self.myTestSet[index] = skimage.transform.rotate(ele, n_deg,preserve_range=True)
+        return self
+
+
+    '''
+    Summary:
+        the "equal" MROP: the source and follow-up outputs must contain the same items and in the same order.
+
+    Args:
+        none
+        need to specify the argument "model"
+    
+    Returns:
+        - a Mtkeras Object
+        - call the property ".myTestSet" to return a tranformed dataset(a list)
+        - call the property ".violatingCases" to return a dataset of violating cases
+
+    Outputs:
+        the number of the violation cases will be printed
+    '''
+    def equality(self):
+        if(self.dataType=='grayscaleImage'):
+            index_one = self.myTestSet.shape[0]
+            index_two = self.myTestSet.shape[1]
+            index_three = self.myTestSet.shape[2]
+            
+            self.myTestSet = self.myTestSet.reshape(index_one,index_two * index_three)/255
+            self.myStartTestSet = self.myStartTestSet.reshape(index_one,index_two * index_three)/255
+
+            predict1 = self.model.predict_classes(self.myTestSet)
+            predict2 = self.model.predict_classes(self.myStartTestSet)
+            for index in range(len(predict1)):
+                if(predict1[index] != predict2[index]):
+                    self.violatingCases.append(self.myStartTestSet[index])
+
+        elif(self.dataType=='colorImage'):
+            sourceOutput = []
+            followUpOutput = []
+
+            for ele in self.myTestSet:
+                sourceOutput.append(process_img(ele).tolist())
+            for ele in self.myStartTestSet:
+                followUpOutput.append(process_img(ele).tolist())
+
+            predict1 = self.model.predict_classes(np.array(sourceOutput))
+            predict2 = self.model.predict_classes(np.array(followUpOutput))
+
+            for index in range(len(predict1)):
+                if(predict1[index] != predict2[index]):
+                    self.violatingCases.append(self.myStartTestSet[index])  
+
+        print("There are {num} violations of MROP equality.".format(num=len(self.violatingCases)))
+        return self
+
+'''
+Summary: a helper function, for image preprocessing before prediction
+'''
+def process_img(img):
+    img = np.array(img, dtype=np.uint8)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.equalizeHist(img)
+    img = img/255
+    img = img.reshape(32, 32, 1)
+    return img
+
+
+
+class Mtkeras_mrip:
+
+    """
+    Summary:
+        The MRIP class, the user can input a source test case and it will output a follow-up test case which can be transformed by multiple MRIPs
+        Note: this library is only used when the user want to seperately use the mrop library
+
+    Implementation:
+        use one line of code: Mtkeras_mrip(<sourceTestSet>,<dataType>).<MRIPs>
+
+    Args:
+        - myTestSet: an array or ndarray that contains image data or other kind of data. Each pieces of data should be a seperate array, and all these array should be stored in one array, which is the myTestSet array.
+        - dataType: a string that can represent the context of the software undertest, it can be:
+            1. grayscaleImage
+            2. colorImage
+            2. text
+
+    Returns:
+        - call the property ".myTestSet", it will return a MRIP tranformed dataset(an array/ndarray).
+    """
+    def __init__(self, myTestSet, dataType='grayscaleImage'):
+        self.myTestSet = myTestSet
+        self.myStartTestSet = myTestSet
+        self.dataType = dataType
     '''
     Summary:
         The "permutative" MRIP: the user can shuffle the order of the data randomly in the dataset
@@ -233,30 +509,147 @@ class Mtkeras:
         return self
 
 
-    '''
+
+class Mtkeras_mrop:
+
+    """
     Summary:
-        the "equal" MROP: the output of the first dataset should be equal to the second test dataset
+        The MROP library, the user can fill the source test outputs and the follow-up test outputs, then check whether it violates the MROP defined
+        Note: this library is only used when the user want to seperately use the mrop library
+
+    Implementation:
+        use one line of code: Mtkeras_mrop(<sourceTestOutput>,<followUpTestOutput>).<MROPs>
 
     Args:
-        none
-        need to specify the argument "model"
-    
-    Returns:
-        - a Mtkeras Object
-        - call the property ".myTestSet" to return a tranformed dataset(an array/ndarray)
-        - call the property ".violatingCases" to return a dataset of violating cases
+        - sourceTestOutput: the source test output, must be a list, each list item represents a source test case output
+        - followUpTestOutput: the follow-up test output, must be a list, each list item represents a follow-up test case output
 
-    Outputs:
-        the number of the violation cases will be printed
+    Returns:
+        it will print out the total number of the violating cases,
+        the function will return a list of the indexes of those violating cases.
+    """
+    def __init__(self, sourceTestOutput, followUpTestOutput):
+        self.sourceTestOutput = sourceTestOutput
+        self.followUpTestOutuput = followUpTestOutput
+        self.violatingCaseIndex = []
+        self.count = 0
+    
     '''
-    def equal(self):
-        if(self.dataType=='grayscaleImage'):
-            self.myTestSet = self.myTestSet.reshape(10000,784)/255
-            myStartTestSet = self.myStartTestSet.reshape(10000,784)/255
-            predict1 = self.model.predict_classes(self.myTestSet)
-            predict2 = self.model.predict_classes(myStartTestSet)
-            for index in range(len(predict1)):
-                if(predict1[index] != predict2[index]):
-                    self.violatingCases.append(self.myStartTestSet[index])
-            print("There are {num} violations of MROP equal.".format(num=len(violatingCases)))
-            return self
+    Summary:
+        This pattern represents those relations where the source and follow-up outputs include the same items although not necessarily in the same order.
+
+    Args:
+        None
+
+    Returns:
+        the function will return an array contains the indexes of the violating cases, which can be used for searching the test cases in the source testset.
+    '''
+    def equivalence(self):
+        for i in range(len(self.sourceTestOutput)):
+            if(set(self.sourceTestOutput[i])!=set(self.followUpTestOutuput[i])):
+                self.count += 1
+                self.violatingCaseIndex.append(i)
+        print("There are {} cases violates the MROP equivalence.".format(self.count))
+        return self.violatingCaseIndex    
+        
+
+    '''
+    Summary:
+        This pattern represents those relations where the source and follow-up outputs must contain the same items and in the same order.
+
+    Args:
+        None
+
+    Returns:
+        the function will return an array contains the indexes of the violating cases, which can be used for searching the test cases in the source testset.
+    '''
+    def equality(self):
+        for i in range(len(self.sourceTestOutput)):
+            if(self.sourceTestOutput[i]!=self.followUpTestOutuput[i]):
+                self.count += 1
+                self.violatingCaseIndex.append(i)
+        print("There are {} cases violates the MROP equality.".format(self.count))
+        return self.violatingCaseIndex
+
+
+    '''
+    Summary:
+        This pattern groups those relations where the follow-up outputs should be subsets (or strict subsets) of the source output and subsets among them.
+
+    Args:
+        None
+
+    Returns:
+        the function will return an array contains the indexes of the violating cases, which can be used for searching the test cases in the source testset.
+    '''
+    def subset(self):
+        for i in range(len(self.sourceTestOutput)):
+            if(isinstance(self.sourceTestOutput[i],list)):
+                if(set(self.sourceTestOutput[i])<set(self.followUpTestOutuput[i])):
+                    self.count += 1
+                    self.violatingCaseIndex.append(i)
+            elif(isinstance(self.sourceTestOutput[i],int)):
+                if(self.sourceTestOutput[i] < self.followUpTestOutuput[i]):
+                    self.count += 1
+                    self.violatingCaseIndex.append(i)
+        print("There are {} cases violates the MROP subset.".format(self.count))
+        return self.violatingCaseIndex
+
+
+    '''
+    Summary:
+        This pattern represents those relations where the intersection among the source and follow-up outputs should be empty
+
+    Args:
+        None
+
+    Returns:
+        the function will return an array contains the indexes of the violating cases, which can be used for searching the test cases in the source testset.
+    '''
+    def disjoint(self):
+        for i in range(len(self.sourceTestOutput)):
+            if(set(self.sourceTestOutput[i]) & set(self.followUpTestOutuput[i])):
+                self.count += 1
+                self.violatingCaseIndex.append(i)
+        print("There are {} cases violates the MROP subset.".format(self.count))
+        return self.violatingCaseIndex
+
+    
+    '''
+    Summary:
+        This pattern includes those relations where the union of the follow-up outputs should contain the same items as the source output
+
+    Args:
+        anotherFollowUpTestOutput: the another follow-up test output which is attempted to complete the first follow up test output compared with the source test output
+
+    Returns:
+        the function will return an array contains the indexes of the violating cases, which can be used for searching the test cases in the source testset.
+    '''
+    def complete(self, anotherFollowUpTestOutput):
+        for i in range(len(self.sourceTestOutput)):
+            if(self.sourceTestOutput[i] != self.followUpTestOutuput[i] + anotherFollowUpTestOutput[i]):
+                self.count += 1
+                self.violatingCaseIndex.append(i)
+        print("There are {} cases violates the MROP complete.".format(self.count))
+        return self.violatingCaseIndex
+
+
+    '''
+    Summary:
+        This pattern includes those metamorphic relations where the source output and the follow-up output should differ in a specific set of items
+
+    Args:
+        - differSet: a set of items that the follow up output should differ from the source output
+
+    Returns:
+        the function will return an array contains the indexes of the violating cases, which can be used for searching the test cases in the source testset.
+    '''
+    def difference(self, differSet):
+        for i in range(len(self.sourceTestOutput)):
+            isEqual = list(set(self.followUpTestOutuput[i])-set(self.sourceTestOutput[i])) == differSet[i]
+            if(not isEqual):
+                self.count += 1
+                self.violatingCaseIndex.append(i)
+        print("There are {} cases violates the MROP difference.".format(self.count))
+        return self.violatingCaseIndex
+            
