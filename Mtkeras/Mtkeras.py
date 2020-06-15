@@ -8,7 +8,8 @@ Created on 17/Jan/2020
 import numpy as np
 import random
 import skimage
-
+from skimage.color import rgb2gray
+import cv2
 
 class Mtkeras:
 
@@ -293,7 +294,6 @@ def process_img(img):
     img = img/255
     img = img.reshape(32, 32, 1)
     return img
-
 
 
 class Mtkeras_mrip:
