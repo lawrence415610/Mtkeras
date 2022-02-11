@@ -60,7 +60,7 @@ Pillow==8.3.2
 pipreqs==0.4.10
 pkginfo==1.5.0.1
 pprintpp==0.4.0
-protobuf==3.10.0
+protobuf==3.15.0
 py-oauth2==0.0.10
 py2exe==0.9.2.2
 pyasn1==0.4.8
