@@ -52,7 +52,7 @@ Mtkeras==1.0.0
 mysql-connector-python==8.0.21
 NetEase-MusicBox==0.2.5.4
 networkx==2.4
-numpy==1.18.1
+numpy==1.22.0
 oauthlib==3.1.0
 opencv-python==4.2.0.32
 opt-einsum==3.1.0
