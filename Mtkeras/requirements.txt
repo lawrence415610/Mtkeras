@@ -89,7 +89,7 @@ requests-toolbelt==0.9.1
 rich==2.0.0
 rsa==4.7
 scikit-image==0.16.2
-scipy==1.4.1
+scipy==1.10.0
 six==1.15.0
 soupsieve==1.9.4
 tensorboard==2.1.0
