@@ -93,7 +93,7 @@ scipy==1.10.0
 six==1.15.0
 soupsieve==1.9.4
 tensorboard==2.1.0
-tensorflow==2.9.3
+tensorflow==2.11.1
 tensorflow-estimator==2.1.0
 termcolor==1.1.0
 tornado==6.0.4
